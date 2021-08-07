@@ -15,4 +15,7 @@ all :
 	make test
 	make main.wasm
 
-
+distribution :
+	make main.wasm
+	cp dist/main.wasm ../bayesplay-front-end/build/main.wasm
+	cp dist/main.wasm ../bayesplay-front-end/public/main.wasm	

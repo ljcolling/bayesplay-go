@@ -30,15 +30,7 @@ func findlimits(f func(x float64) float64) float64 {
 // integrating t distributions
 
 func Integrate(f func(float64) float64, min float64, max float64) float64 {
-	auc := quad.Fixed(f, min, max, 100, nil, 10000)
-	if math.IsNaN(auc) {
-		limits := findlimits(f)
-		min := limits * -1
-		max := limits * 1
-		auc = quad.Fixed(f, min, max, 100000, nil, 10000)
-	} else {
-		auc = quad.Fixed(f, min, max, 100000, nil, 10000)
-	}
+	auc := quad.Fixed(f, min, max, 10000, nil, 100)
 	return auc
 }
 
@@ -108,6 +100,9 @@ func Dt(x float64, df float64, ncp float64) float64 {
 	var trm2 float64 = special.HypPFQ([]float64{(df + 1) / 2}, []float64{0.5}, valF)
 	trm2 /= math.Sqrt(fac1) * math.Gamma(df/2+1)
 	Px *= trm1 + trm2
+  if math.IsNaN(Px) {
+    return 0
+  }
 	return Px
 }
 
