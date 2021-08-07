@@ -104,9 +104,6 @@ func CreatePrior(priorDefinition PriorDefinition) Prior {
 
 func Bayesfactor(likelihood LikelihoodDefinition, altprior PriorDefinition, nullprior PriorDefinition) (float64, error) {
 
-	// data := CreateLikelihood(likelihood)
-	// alt := CreatePrior(altprior)
-	// null := CreatePrior(nullprior)
 
 	altModel := Pp(likelihood, altprior)
 	nullModel := Pp(likelihood, nullprior)
@@ -167,8 +164,6 @@ func mult(likelihood func(x float64) float64, prior func(x float64) float64) fun
 }
 
 func Pp(likelihoodDef LikelihoodDefinition, priorDef PriorDefinition) Predictive {
-	loops := 0
-START:
 
 	likelihood := CreateLikelihood(likelihoodDef)
 	prior := CreatePrior(priorDef)
@@ -176,35 +171,25 @@ START:
 	likelihoodFunction := likelihood.Function
 	prod = mult(likelihoodFunction, prior.Function)
 	var pred Predictive
-	pred.Function = prod
-	switch prior.Name {
-	case "point":
-		pred.Auc = likelihoodFunction(prior.point)
-		goto END
-	}
-	switch likelihood.Name {
-	case "binomial":
-		pred.Auc = Integrate(prod, 0, 1)
-	default:
-		pred.Auc = Integrate(prod, math.Inf(-1), math.Inf(1))
-	}
 
-END:
 	pred.Likelihood = likelihood.Function
 	pred.Prior = prior.Function
+	pred.Function = prod
 
-	// noncentral t distributions have issues with extreme values
-	// but this issue is restricted to observations of a particular sign
-	// the easy fix for this is just to flip the observation
-	if math.IsNaN(pred.Auc) {
-		likelihoodDef.Params[0] = -likelihoodDef.Params[0]
-		loops += 1
-		if loops > 1 {
-			// bail out to prevent infinite loop
-			return pred
-		}
-		goto START
+  // handle point priors
+	if prior.Name == "point" {
+		pred.Auc = likelihoodFunction(prior.point)
+    return pred
 	}
+
+  // handle binomial likelihoods
+	if likelihood.Name == "binomial" {
+		pred.Auc = Integrate(prod, 0, 1)
+    return pred
+  }
+
+  // handle general case
+  pred.Auc = Integrate(prod, math.Inf(-1), math.Inf(1))
 
 	return pred
 

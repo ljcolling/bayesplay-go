@@ -20,13 +20,16 @@ func TestDistribution(t *testing.T) {
 
 	// non-central t distribution
 
-	got := Dt(10, 10, 10)
-	want := 0.1601017
+  var got float64
+  var want float64
+
+	got = Dt(10, 10, 10)
+	want = 0.1601017
 
 	if !cmp.Equal(got, want, opt) {
 		t.Fatalf("got %v, wanted %v", got, want)
 	}
-
+ 
 	got = Dt(0.1, 12, .2)
 	want = 0.3887798
 
