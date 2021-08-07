@@ -1,5 +1,6 @@
-main.wasm : ./cmd/bayesplay/main.go ./pkg/distributions/distributions.go ./pkg/bayesfactor/bayesfactor.go
-	GOOS=js GOARCH=wasm go build -o dist/main.wasm cmd/bayesplay/main.go
+main.wasm :
+	cd cmd/bayesplay/; \
+	GOOS=js GOARCH=wasm go build -o ../../dist/main.wasm
 
 tests :
 	go test pkg/distributions/distributions.go pkg/distributions/distributions_test.go
@@ -17,5 +18,4 @@ all :
 
 distribution :
 	make main.wasm
-	cp dist/main.wasm ../bayesplay-front-end/build/main.wasm
 	cp dist/main.wasm ../bayesplay-front-end/public/main.wasm	

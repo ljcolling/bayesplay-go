@@ -1,3 +1,4 @@
+// +build js,wasm
 package main
 
 import (
@@ -9,20 +10,24 @@ import (
 
 	"math"
 	"sort"
-	"syscall/js"
+	"syscall/js" //noqa: F401
 )
 
+// var dnormPlot = functions.dnormPlot
+// var dnormPlot = DnormPlot
 //// alias imported function names
 var print = fmt.Println
 
 // main distributions
-var dt = distributions.Dt
+// var Dt = distributions.Dt
 var dnorm = distributions.Dnorm
-var dunif = distributions.Dunif
+
+// var dunif = distributions.Dunif
 var dbinom = distributions.Dbinom
 var dbeta = distributions.Dbeta
 var scaledShiftedT = distributions.Scaled_shifted_t
-var dcauchy = distributions.Dcauchy
+
+// var dcauchy = distributions.Dcauchy
 
 var integrate = distributions.Integrate
 var sqrt = math.Sqrt
@@ -284,6 +289,10 @@ func dnormWrapper(this js.Value, args []js.Value) interface{} {
 
 var normalLikelihood = bayesfactor.NormalLikelihood
 
+func getElementByIndex(x interface{}, i int, element string) interface{} {
+	return x.([]interface{})[i].(map[string]interface{})[element]
+}
+
 // func compute_wrapper(this js.Value, args []js.Value) {
 func computeWrapper(this js.Value, args []js.Value) interface{} {
 
@@ -362,16 +371,12 @@ func computeWrapper(this js.Value, args []js.Value) interface{} {
 
 	// fmt.Println("Find the minimum and max values")
 	// find the limits of the likelihood function
-	likelihoodLimitsXmin := likelihoodPlotData.([]interface{})[0].(map[string]interface{})["x"].(float64)
-	likelihoodLimitsXmax := likelihoodPlotData.([]interface{})[100].(map[string]interface{})["x"].(float64)
-	fmt.Println(likelihoodLimitsXmin)
-	fmt.Println(likelihoodLimitsXmax)
+	likelihoodLimitsXmin := getElementByIndex(likelihoodPlotData, 0, "x").(float64)
+	likelihoodLimitsXmax := getElementByIndex(likelihoodPlotData, 100, "x").(float64)
 
 	// find the limits of the alt prior
-	altpriorLimitsXmin := altpriorPlotData.([]interface{})[0].(map[string]interface{})["x"].(float64)
-	altpriorLimitsXmax := altpriorPlotData.([]interface{})[100].(map[string]interface{})["x"].(float64)
-	fmt.Println(altpriorLimitsXmin)
-	fmt.Println(altpriorLimitsXmax)
+	altpriorLimitsXmin := getElementByIndex(altpriorPlotData, 0, "x").(float64)
+	altpriorLimitsXmax := getElementByIndex(altpriorPlotData, 0, "x").(float64)
 
 	var nullpriorLimitsXmin float64
 	var nullpriorLimitsXmax float64
@@ -379,8 +384,8 @@ func computeWrapper(this js.Value, args []js.Value) interface{} {
 		nullpriorLimitsXmin = altpriorLimitsXmin
 		nullpriorLimitsXmax = altpriorLimitsXmax
 	} else {
-		nullpriorLimitsXmin = nullpriorPlotData.([]interface{})[0].(map[string]interface{})["x"].(float64)
-		nullpriorLimitsXmax = nullpriorPlotData.([]interface{})[100].(map[string]interface{})["x"].(float64)
+		nullpriorLimitsXmin = getElementByIndex(nullpriorPlotData, 0, "x").(float64)
+		nullpriorLimitsXmax = getElementByIndex(nullpriorPlotData, 0, "x").(float64)
 	}
 	fmt.Println(nullpriorLimitsXmin)
 	fmt.Println(nullpriorLimitsXmax)
@@ -452,18 +457,6 @@ func computeWrapper(this js.Value, args []js.Value) interface{} {
 		"altposteriorPlotData":  altPosteriorPlot,
 		"nullposteriorPlotData": nullPosteriorPlot,
 	}
-	// result = append(
-	// 	result,
-	// 	bf,
-	// 	likelihoodPlotData,
-	// 	altpriorPlotData,
-	// 	nullpriorPlotData,
-	// 	likelihood.Name,
-	// 	altprior.Name,
-	// 	nullprior.Name,
-	// 	altPredictions,
-	// 	nullPredictions,
-	// )
 	return result
 }
 
@@ -473,26 +466,27 @@ func dnormPlotWrapper(this js.Value, args []js.Value) interface{} {
 	return dnormPlot(mean, sd)
 }
 
-func dnormPlot(mean float64, sd float64) interface{} {
-
-	min := mean - 4*sd // min range of plot
-	max := mean + 4*sd // max range  of plot
-	result := []interface{}{}
-
-	likelihoodFunction := normalLikelihood(mean, sd)
-
-	step := (max - min) / 100
-	x := min
-	for i := 0; i < 101; i++ {
-		y := likelihoodFunction(x)
-		res := map[string]interface{}{"x": x, "y": y}
-		result = append(result, res)
-		x += step
-	}
-
-	return result
-
-}
+// var dnormPlot = DnormPlot
+// func dnormPlot(mean float64, sd float64) interface{} {
+//
+// 	min := mean - 4*sd // min range of plot
+// 	max := mean + 4*sd // max range  of plot
+// 	result := []interface{}{}
+//
+// 	likelihoodFunction := normalLikelihood(mean, sd)
+//
+// 	step := (max - min) / 100
+// 	x := min
+// 	for i := 0; i < 101; i++ {
+// 		y := likelihoodFunction(x)
+// 		res := map[string]interface{}{"x": x, "y": y}
+// 		result = append(result, res)
+// 		x += step
+// 	}
+//
+// 	return result
+//
+// }
 
 var normalPrior = bayesfactor.NormalPrior
 
